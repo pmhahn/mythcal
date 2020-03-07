@@ -16,9 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CONFIG_FILE = "mythcal.conf"
-CACHE_FILE = "mythcal.cache"
-CREDENTIALS_FILE = "mythcal.credentials"
+from os.path import dirname, join
+from sys import argv
+CONFIG_FILE = join(dirname(argv[0]), "mythcal.conf")
+CACHE_FILE = join(dirname(argv[0]), "mythcal.cache")
+CREDENTIALS_FILE = join(dirname(argv[0]), "mythcal.credentials")
 
 VERSION = "0.27.0"
 
