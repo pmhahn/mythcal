@@ -211,7 +211,10 @@ if os.path.exists(CACHE_FILE):
     if options.verbose:
         print("Reading cache file...")
     with open(CACHE_FILE, "rb") as f:
-        last_recordings = pickle.load(f)
+        try:
+            last_recordings = pickle.load(f)
+        except EOFError as ex:
+            print("Failed: %s" % (ex,), file=sys.stderr)
     if options.verbose:
         print("Done.")
 else:
