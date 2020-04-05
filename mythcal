@@ -82,10 +82,10 @@ settings = Values({
 })
 
 parser = OptionParser()
-parser.add_option("-a", "--auth",    action="store_true", dest="auth",    default=False, help="authenticate (required before using mythcal for the first time)")
-parser.add_option("-n", "--dry-run", action="store_true", dest="dry_run", default=False, help="perform a trial run; don't make any changes (implies -v)")
-parser.add_option("-V", "--version", action="store_true", dest="version", default=False, help="show version and exit")
-parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="increase verbosity")
+parser.add_option("-a", "--auth",    action="store_true", help="authenticate (required before using mythcal for the first time)")
+parser.add_option("-n", "--dry-run", action="store_true", help="perform a trial run; don't make any changes (implies -v)")
+parser.add_option("-V", "--version", action="store_true", help="show version and exit")
+parser.add_option("-v", "--verbose", action="store_true", help="increase verbosity")
 (options, args) = parser.parse_args()
 
 if options.version:
