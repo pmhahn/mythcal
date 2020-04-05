@@ -20,7 +20,6 @@ from __future__ import print_function
 from builtins import input
 from operator import itemgetter
 from os.path import dirname, join
-from sys import argv
 import configparser
 from optparse import Values, OptionParser
 from datetime import datetime
@@ -41,9 +40,10 @@ from oauth2client.file import Storage
 from apiclient.errors import HttpError
 
 
-CONFIG_FILE = join(dirname(argv[0]), "mythcal.conf")
-CACHE_FILE = join(dirname(argv[0]), "mythcal.cache")
-CREDENTIALS_FILE = join(dirname(argv[0]), "mythcal.credentials")
+BASEDIR = dirname(sys.argv[0])
+CONFIG_FILE = join(BASEDIR, "mythcal.conf")
+CACHE_FILE = join(BASEDIR, "mythcal.cache")
+CREDENTIALS_FILE = join(BASEDIR, "mythcal.credentials")
 
 VERSION = "0.27.0"
 
