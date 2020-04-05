@@ -18,6 +18,8 @@
 
 from __future__ import print_function
 from builtins import input
+from builtins import str
+from operator import itemgetter
 from os.path import dirname, join
 from sys import argv
 CONFIG_FILE = join(dirname(argv[0]), "mythcal.conf")
@@ -168,8 +170,6 @@ def convert_program(prog):
         "description": prog.description
     }
 
-def sort_programs_by_start(p1, p2):
-    return cmp(p1["start"], p2["start"])
 
 def get_recordings_from_backend():
     """Gets current and upcoming recordings from MythTV"""
@@ -186,7 +186,7 @@ def get_recordings_from_backend():
         print("    found %d upcoming recording(s)" % len(upcoming))
 
     upcoming = [convert_program(p) for p in upcoming]
-    upcoming.sort(sort_programs_by_start)
+    upcoming.sort(key=itemgetter("start"))
 
     current = []
     for recorder in mythtv.getRecorderList():
@@ -201,7 +201,7 @@ def get_recordings_from_backend():
         print("    found %d current recording(s)" % len(current))
 
     current = [convert_program(p) for p in current]
-    current.sort(sort_programs_by_start)
+    current.sort(key=itemgetter("start"))
 
     return {"current": current, "future": upcoming}
 
