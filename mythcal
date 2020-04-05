@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
 from os.path import dirname, join
 from sys import argv
 CONFIG_FILE = join(dirname(argv[0]), "mythcal.conf")
@@ -86,7 +87,7 @@ parser.add_option("-v", "--verbose", action="store_true", dest="verbose", defaul
 (options, args) = parser.parse_args()
 
 if options.version:
-    print "mythcal %s" % VERSION
+    print("mythcal %s" % VERSION)
     sys.exit(0)
 
 if options.dry_run:
@@ -102,25 +103,25 @@ if options.auth:
     )
 
     auth_uri = flow.step1_get_authorize_url()
-    print AUTH_MESSAGE_1 % auth_uri
+    print(AUTH_MESSAGE_1 % auth_uri)
 
     auth_code = raw_input("Code: ")
-    print
+    print()
 
     credentials = flow.step2_exchange(auth_code)
     storage = Storage(CREDENTIALS_FILE)
     storage.put(credentials)
-    print AUTH_MESSAGE_2
+    print(AUTH_MESSAGE_2)
     sys.exit(0)
 
 # check for existence of credentials
 if not os.path.isfile(CREDENTIALS_FILE):
-    print >>sys.stderr, "mythcal: no credentials file. You need to run `mythcal --auth` first"
+    print("mythcal: no credentials file. You need to run `mythcal --auth` first", file=sys.stderr)
     sys.exit(1)
 
 # get pytz timezone object for local time zone
 if settings.mythtv.timezone not in pytz.all_timezones:
-    print >>sys.stderr, "mythcal: timezone name '%s' is not recognised" % settings.mythtv.timezone
+    print("mythcal: timezone name '%s' is not recognised" % settings.mythtv.timezone, file=sys.stderr)
     sys.exit(1)
 time_zone = pytz.timezone(settings.mythtv.timezone)
 
@@ -131,27 +132,27 @@ def mythtv_time_to_naive_utc_time(mythtv_time):
     """Convert MythTV time to naive UTC time"""
 
     if DATE_TIME_DEBUG:
-        print "converting time..."
+        print("converting time...")
 
     # The timestamp we get from a MythTV datetime object is affected by its timezone...
     aware_local_mythtv_time = mythtv_time
     if DATE_TIME_DEBUG:
-        print "  %s\t%s\t%d" % (aware_local_mythtv_time, aware_local_mythtv_time.timetuple(), aware_local_mythtv_time.timestamp())
+        print("  %s\t%s\t%d" % (aware_local_mythtv_time, aware_local_mythtv_time.timetuple(), aware_local_mythtv_time.timestamp()))
 
     # ...so we convert to UTC to ensure we get a POSIX timestamp from it
     aware_utc_mythtv_time = aware_local_mythtv_time.astimezone(pytz.utc)
     if DATE_TIME_DEBUG:
-        print "  %s\t%s\t%d" % (aware_utc_mythtv_time, aware_utc_mythtv_time.timetuple(), aware_utc_mythtv_time.timestamp())
+        print("  %s\t%s\t%d" % (aware_utc_mythtv_time, aware_utc_mythtv_time.timetuple(), aware_utc_mythtv_time.timestamp()))
 
     # Create a standard datetime that represents the same point in time...
     aware_utc_datetime = datetime.fromtimestamp(aware_utc_mythtv_time.timestamp(), pytz.utc)
     if DATE_TIME_DEBUG:
-        print "  %s\t%s" % (aware_utc_datetime, aware_utc_datetime.timetuple())
+        print("  %s\t%s" % (aware_utc_datetime, aware_utc_datetime.timetuple()))
 
     # ...and drop the timezone
     naive_utc_datetime = aware_utc_datetime.replace(tzinfo=None)
     if DATE_TIME_DEBUG:
-        print "  %s\t\t%s" % (naive_utc_datetime, naive_utc_datetime.timetuple())
+        print("  %s\t\t%s" % (naive_utc_datetime, naive_utc_datetime.timetuple()))
 
     return naive_utc_datetime
 
@@ -173,7 +174,7 @@ def get_recordings_from_backend():
     """Gets current and upcoming recordings from MythTV"""
 
     if options.verbose:
-        print "Getting recordings from MythTV backend..."
+        print("Getting recordings from MythTV backend...")
 
     mythtv = MythBE()
 
@@ -181,7 +182,7 @@ def get_recordings_from_backend():
     upcoming = list(upcoming) # convert listiterator to list
 
     if options.verbose:
-        print "    found %d upcoming recording(s)" % len(upcoming)
+        print("    found %d upcoming recording(s)" % len(upcoming))
 
     upcoming = map(convert_program, upcoming)
     upcoming.sort(sort_programs_by_start)
@@ -196,7 +197,7 @@ def get_recordings_from_backend():
             if prog.get("recgroup") != "LiveTV":
                 current.append(prog)
     if options.verbose:
-        print "    found %d current recording(s)" % len(current)
+        print("    found %d current recording(s)" % len(current))
 
     current = map(convert_program, current)
     current.sort(sort_programs_by_start)
@@ -210,15 +211,15 @@ recordings = get_recordings_from_backend()
 last_recordings = None
 if os.path.exists(CACHE_FILE):
     if options.verbose:
-        print "Reading cache file..."
+        print("Reading cache file...")
     f = open(CACHE_FILE, "r")
     last_recordings = pickle.load(f)
     f.close()
     if options.verbose:
-        print "Done."
+        print("Done.")
 else:
     if options.verbose:
-        print "Cache file does not exist."
+        print("Cache file does not exist.")
 
 def submit_batch_request(request, url):
     response_feed = calendar_service.ExecuteBatch(request, url)
@@ -229,12 +230,12 @@ def delete_existing_events():
     """Deletes all events from the calendar"""
 
     if options.verbose:
-        print "Deleting existing entries..."
+        print("Deleting existing entries...")
     result = service.events().list(calendarId = settings.calendar.id).execute()
     while result:
         for item in result["items"]:
             if options.verbose:
-                print "    will delete \"%s\"" % item["summary"]
+                print("    will delete \"%s\"" % item["summary"])
             if not options.dry_run:
                 service.events().delete(calendarId = settings.calendar.id, eventId = item["id"]).execute()
         if "nextPageToken" in result:
@@ -242,33 +243,33 @@ def delete_existing_events():
         else:
             result = None
     if options.verbose:
-        print "Existing entries deleted."
+        print("Existing entries deleted.")
 
 # update calendar, and output new recording list, if different
 if recordings != last_recordings:
 
     # get calendar service and log in
     if options.verbose:
-        print "Logging into Google Calendar..."
+        print("Logging into Google Calendar...")
     storage = Storage(CREDENTIALS_FILE)
     credentials = storage.get()
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = build("calendar", "v3", http=http)
     if options.verbose:
-        print "Done."
+        print("Done.")
 
     # Get all calendars
     if options.verbose:
-        print "Getting calendar..."
+        print("Getting calendar...")
     try:
         result = service.calendars().get(calendarId = settings.calendar.id).execute()
-    except HttpError, e:
-        print >>sys.stderr, "mythcal: could not get calendar with id '%s':" % settings.calendar.id
-        print >>sys.stderr, e.content
+    except HttpError as e:
+        print("mythcal: could not get calendar with id '%s':" % settings.calendar.id, file=sys.stderr)
+        print(e.content, file=sys.stderr)
         sys.exit(1)
     if options.verbose:
-        print "Done."
+        print("Done.")
 
     delete_existing_events()
 
@@ -303,12 +304,12 @@ if recordings != last_recordings:
         return event
 
     if options.verbose:
-        print "Adding new entries..."
+        print("Adding new entries...")
 
     # add an event for current/future recordings
     for prog in recordings["current"] + recordings["future"]:
         if options.verbose:
-            print "    will add \"%s\"" % prog["title"]
+            print("    will add \"%s\"" % prog["title"])
         if not options.dry_run:
             event = create_programme_event(prog["title"], prog["subtitle"], prog["channel"], prog["start"], prog["end"], prog["description"])
             service.events().insert(calendarId = settings.calendar.id, body=event).execute()
@@ -316,28 +317,28 @@ if recordings != last_recordings:
     # add 'last updated' event
     last_update_text = "MythTV updated %s" % time.strftime("%H:%M", time.localtime())
     if options.verbose:
-        print "    will add \"%s\"" % last_update_text
+        print("    will add \"%s\"" % last_update_text)
     if not options.dry_run:
         event = create_all_day_event(title=last_update_text, start=time.gmtime(), end=time.gmtime(time.time() + 24*60*60))
         service.events().insert(calendarId = settings.calendar.id, body=event).execute()
 
     if options.verbose:
-        print "New entries added."
+        print("New entries added.")
 
     # update last recording list
     if options.verbose:
-        print "Updating cache..."
+        print("Updating cache...")
     if not options.dry_run:
         f = open(CACHE_FILE, "w")
         pickle.dump(recordings, f)
         f.close()
 
     if options.verbose:
-        print "Done."
+        print("Done.")
 
 else:
     if options.verbose:
-        print "Recordings have not changed; not updating calendar."
+        print("Recordings have not changed; not updating calendar.")
 
 if options.verbose:
-    print "Finished."
+    print("Finished.")
