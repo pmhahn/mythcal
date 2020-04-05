@@ -270,6 +270,7 @@ if recordings != last_recordings:
 
     delete_existing_events()
 
+
     def create_all_day_event(title, start, end, content=None):
         event = {
             "summary": title,
@@ -283,22 +284,19 @@ if recordings != last_recordings:
         }
         return event
 
-    def create_programme_event(title, subtitle, channel, start, end, content=None):
-        if subtitle:
-            event_title = "%s: %s (%s)" % (title, subtitle, channel)
-        else:
-            event_title = "%s (%s)" % (title, channel)
-        event = {
-            "summary": event_title,
+
+    def create_programme_event(prog):
+        return {
+            "summary": ("%(title)s: %(subtitle)s (%(channel)s)" if prog.get("subtitle") else "%(title)s (%(channel)s)") % prog,
             "start": {
-                "dateTime": datetime.fromtimestamp(start, tz=pytz.utc).strftime(DATE_TIME_FORMAT),
+                "dateTime": datetime.fromtimestamp(prog["start"], tz=pytz.utc).strftime(DATE_TIME_FORMAT),
             },
             "end": {
-                "dateTime": datetime.fromtimestamp(end, tz=pytz.utc).strftime(DATE_TIME_FORMAT),
+                "dateTime": datetime.fromtimestamp(prog["end"], tz=pytz.utc).strftime(DATE_TIME_FORMAT),
             },
-            "description": content
+            "description": prog["description"],
         }
-        return event
+
 
     if options.verbose:
         print("Adding new entries...")
@@ -308,7 +306,7 @@ if recordings != last_recordings:
         if options.verbose:
             print("    will add \"%s\"" % prog["title"])
         if not options.dry_run:
-            event = create_programme_event(prog["title"], prog["subtitle"], prog["channel"], prog["start"], prog["end"], prog["description"])
+            event = create_programme_event(prog)
             service.events().insert(calendarId = settings.calendar.id, body=event).execute()
 
     # add 'last updated' event
