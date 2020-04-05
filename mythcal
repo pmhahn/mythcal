@@ -21,6 +21,26 @@ from builtins import input
 from operator import itemgetter
 from os.path import dirname, join
 from sys import argv
+import configparser
+from optparse import Values, OptionParser
+from datetime import datetime
+import pickle
+import os
+import sys
+import time
+
+from MythTV import MythBE
+import pytz
+
+from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.file import Storage
+
+import httplib2
+from apiclient.discovery import build
+from oauth2client.file import Storage
+from apiclient.errors import HttpError
+
+
 CONFIG_FILE = join(dirname(argv[0]), "mythcal.conf")
 CACHE_FILE = join(dirname(argv[0]), "mythcal.cache")
 CREDENTIALS_FILE = join(dirname(argv[0]), "mythcal.credentials")
@@ -48,26 +68,6 @@ AUTH_MESSAGE_2 = "Done! You can now run mythcal without the `--auth` flag."
 
 DATE_FORMAT = "%Y-%m-%d"
 DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.000%z"
-
-import configparser
-from optparse import Values, OptionParser
-
-from datetime import datetime
-import pickle
-import os
-import sys
-
-from MythTV import MythBE
-import pytz
-import time
-
-from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.file import Storage
-
-import httplib2
-from apiclient.discovery import build
-from oauth2client.file import Storage
-from apiclient.errors import HttpError
 
 config = configparser.RawConfigParser()
 config.read(CONFIG_FILE)
