@@ -17,6 +17,7 @@
 # limitations under the License.
 
 from __future__ import print_function
+from builtins import input
 from os.path import dirname, join
 from sys import argv
 CONFIG_FILE = join(dirname(argv[0]), "mythcal.conf")
@@ -105,7 +106,7 @@ if options.auth:
     auth_uri = flow.step1_get_authorize_url()
     print(AUTH_MESSAGE_1 % auth_uri)
 
-    auth_code = raw_input("Code: ")
+    auth_code = input("Code: ")
     print()
 
     credentials = flow.step2_exchange(auth_code)
